@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>烟花特效</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworks"></canvas>
+  <script>
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let width, height, fireworks = [];
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    class Firework {
+      constructor(x, y, vx, vy, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.color = color;
+        this.alpha = 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= 0.01;
+      }
+      draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+    function randomColor() {
+      return `hsl(${Math.random() * 360}, 100%, 70%)`;
+    }
+    function createFirework() {
+      const x = Math.random() * width;
+      const y = Math.random() * height / 2;
+      for (let i = 0; i < 50; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 1;
+        fireworks.push(new Firework(
+          x, y,
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed,
+          randomColor()
+        ));
+      }
+    }
+    function loop() {
+      ctx.clearRect(0, 0, width, height);
+      fireworks.forEach((firework, i) => {
+        firework.update();
+        firework.draw();
+        if (firework.alpha <= 0) fireworks.splice(i, 1);
+      });
+      if (Math.random() < 0.05) createFirework();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
